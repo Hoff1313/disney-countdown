@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Disney Trip">
+<meta name="theme-color" content="#534AB7">
+<title>Disney Countdown</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  :root {
+    --purple: #534AB7;
+    --purple-light: #EEEDFE;
+    --purple-dark: #3C3489;
+    --purple-mid: #7F77DD;
+    --purple-pale: #AFA9EC;
+    --teal: #1D9E75;
+    --teal-light: #E1F5EE;
+    --teal-mid: #9FE1CB;
+    --teal-dark: #085041;
+    --amber: #BA7517;
+    --amber-light: #FAEEDA;
+    --amber-mid: #FAC775;
+    --amber-dark: #633806;
+    --coral: #D85A30;
+    --coral-light: #FAECE7;
+    --coral-dark: #712B13;
+    --blue: #185FA5;
+    --blue-light: #E6F1FB;
+    --blue-dark: #0C447C;
+    --green-light: #EAF3DE;
+    --green-dark: #27500A;
+    --bg: #f5f4fb;
+    --card: #ffffff;
+    --text: #1a1a2e;
+    --text-secondary: #5a5a7a;
+    --text-hint: #9090b0;
+    --border: rgba(83,74,183,0.12);
+    --safe-top: env(safe-area-inset-top, 44px);
+    --safe-bottom: env(safe-area-inset-bottom, 20px);
+  }
+  html, body { height: 100%; overflow: hidden; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    height: -webkit-fill-available;
+  }
+
+  /* Header */
+  .header {
+    background: var(--purple);
+    padding: var(--safe-top) 1rem 1.1rem;
+    flex-shrink: 0;
+  }
+  .header-top {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 1rem;
+    padding-top: 6px;
+  }
+  .header-title { font-size: 16px; font-weight: 600; color: var(--purple-light); }
+  .header-sub { font-size: 12px; color: var(--purple-pale); margin-top: 1px; }
+  .countdown-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; }
+  .cd-unit {
+    background: rgba(255,255,255,0.13);
+    border-radius: 12px;
+    padding: 10px 4px;
+    text-align: center;
+  }
+  .cd-num { font-size: 26px; font-weight: 700; color: #fff; line-height: 1; letter-spacing: -0.5px; }
+  .cd-lbl { font-size: 10px; color: var(--purple-pale); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .prog-wrap { margin-top: 10px; }
+  .prog-bg { background: rgba(255,255,255,0.18); border-radius: 999px; height: 5px; overflow: hidden; }
+  .prog-fill { height: 100%; border-radius: 999px; background: var(--teal-mid); transition: width 1s linear; }
+  .prog-lbl { font-size: 11px; color: var(--purple-pale); margin-top: 4px; text-align: right; }
+
+  /* Tabs */
+  .tabs {
+    display: flex;
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .tab {
+    flex: 1;
+    padding: 11px 4px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-hint);
+    text-align: center;
+    cursor: pointer;
+    border: none;
+    background: none;
+    border-bottom: 2.5px solid transparent;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .tab.active { color: var(--purple); border-bottom-color: var(--purple); }
+
+  /* Scroll area */
+  .scroll-area {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 1rem 1rem calc(var(--safe-bottom) + 1rem);
+  }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* Fact cards */
+  .fact-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.9rem;
+  }
+  .nav-btn {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 7px 14px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--purple);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: background 0.1s;
+  }
+  .nav-btn:active { background: var(--purple-light); }
+  .nav-btn:disabled { color: var(--text-hint); border-color: var(--border); }
+  .day-counter { font-size: 12px; color: var(--text-secondary); }
+  .fact-card {
+    background: var(--card);
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    padding: 1rem 1.1rem;
+    margin-bottom: 12px;
+  }
+  .fact-card.preview { opacity: 0.55; }
+  .badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 999px;
+    margin-bottom: 9px;
+    letter-spacing: 0.02em;
+  }
+  .fact-title { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 7px; line-height: 1.4; }
+  .fact-body { font-size: 13px; color: var(--text-secondary); line-height: 1.65; }
+  .fact-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 11px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--purple);
+    text-decoration: none;
+  }
+  .fact-link:active { opacity: 0.7; }
+  .preview-label { font-size: 12px; color: var(--text-hint); margin-top: 6px; font-style: italic; }
+
+  /* Tips */
+  .tips-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .tip-card {
+    background: var(--card);
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    padding: 0.9rem;
+  }
+  .tip-icon {
+    width: 32px; height: 32px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 9px;
+    font-size: 16px;
+  }
+  .tip-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 5px; line-height: 1.3; }
+  .tip-body { font-size: 12px; color: var(--text-secondary); line-height: 1.55; }
+
+  /* Checklist */
+  .section-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-hint);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    margin: 0.5rem 0 0.5rem;
+  }
+  .check-card {
+    background: var(--card);
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+    margin-bottom: 12px;
+  }
+  .check-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: background 0.1s;
+  }
+  .check-item:last-child { border-bottom: none; }
+  .check-item:active { background: var(--purple-light); }
+  .check-box {
+    width: 22px; height: 22px;
+    border-radius: 7px;
+    border: 1.5px solid #d0cee8;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .check-box.done { background: var(--purple); border-color: var(--purple); }
+  .check-label { font-size: 14px; color: var(--text); line-height: 1.4; flex: 1; }
+  .check-label.done { color: var(--text-hint); text-decoration: line-through; }
+  .progress-summary {
+    text-align: center;
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+    font-weight: 500;
+  }
+  .progress-summary span { color: var(--purple); font-weight: 700; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <svg width="36" height="36" viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg">
+      <rect x="13" y="22" width="10" height="11" rx="2" fill="#EEEDFE"/>
+      <rect x="7" y="16" width="8" height="17" rx="2" fill="#EEEDFE"/>
+      <rect x="21" y="16" width="8" height="17" rx="2" fill="#EEEDFE"/>
+      <rect x="1" y="19" width="7" height="14" rx="1.5" fill="#AFA9EC"/>
+      <rect x="28" y="19" width="7" height="14" rx="1.5" fill="#AFA9EC"/>
+      <polygon points="11,16 11,10 15,13" fill="#9FE1CB"/>
+      <polygon points="25,16 25,10 21,13" fill="#9FE1CB"/>
+      <polygon points="4.5,19 4.5,13 8,17" fill="#9FE1CB"/>
+      <polygon points="31.5,19 31.5,13 28,17" fill="#9FE1CB"/>
+      <polygon points="18,22 18,11 22,18 14,18" fill="#9FE1CB"/>
+      <circle cx="18" cy="10" r="2" fill="#FAC775"/>
+      <rect x="15" y="26" width="6" height="7" rx="1" fill="#3C3489"/>
+    </svg>
+    <div>
+      <div class="header-title">Disney countdown</div>
+      <div class="header-sub">July 13, 2026 — the magic awaits</div>
+    </div>
+  </div>
+  <div class="countdown-row">
+    <div class="cd-unit"><div class="cd-num" id="cd-d">—</div><div class="cd-lbl">Days</div></div>
+    <div class="cd-unit"><div class="cd-num" id="cd-h">—</div><div class="cd-lbl">Hours</div></div>
+    <div class="cd-unit"><div class="cd-num" id="cd-m">—</div><div class="cd-lbl">Mins</div></div>
+    <div class="cd-unit"><div class="cd-num" id="cd-s">—</div><div class="cd-lbl">Secs</div></div>
+  </div>
+  <div class="prog-wrap">
+    <div class="prog-bg"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+    <div class="prog-lbl" id="prog-lbl"></div>
+  </div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="switchTab(0,this)">Daily facts</button>
+  <button class="tab" onclick="switchTab(1,this)">Park tips</button>
+  <button class="tab" onclick="switchTab(2,this)">Checklist</button>
+</div>
+
+<div class="scroll-area">
+
+  <div class="tab-panel active" id="panel-0">
+    <div class="fact-nav">
+      <button class="nav-btn" id="prev-btn" onclick="changeDay(-1)" disabled>← Prev</button>
+      <span class="day-counter" id="day-counter"></span>
+      <button class="nav-btn" id="next-btn" onclick="changeDay(1)">Next →</button>
+    </div>
+    <div id="facts-container"></div>
+  </div>
+
+  <div class="tab-panel" id="panel-1">
+    <div class="tips-grid" id="tips-container"></div>
+  </div>
+
+  <div class="tab-panel" id="panel-2">
+    <div class="progress-summary" id="check-progress"></div>
+    <div id="checklist-container"></div>
+  </div>
+
+</div>
+
+<script>
+const TARGET = new Date('2026-07-13T00:00:00');
+const START  = new Date('2026-04-27T00:00:00');
+const TOTAL_DAYS = Math.ceil((TARGET - START) / 86400000);
+
+function tick() {
+  const now = new Date();
+  const diff = TARGET - now;
+  if (diff <= 0) {
+    ['cd-d','cd-h','cd-m','cd-s'].forEach(id => document.getElementById(id).textContent = '0');
+    return;
+  }
+  document.getElementById('cd-d').textContent = Math.floor(diff / 86400000);
+  document.getElementById('cd-h').textContent = String(Math.floor((diff % 86400000) / 3600000)).padStart(2,'0');
+  document.getElementById('cd-m').textContent = String(Math.floor((diff % 3600000) / 60000)).padStart(2,'0');
+  document.getElementById('cd-s').textContent = String(Math.floor((diff % 60000) / 1000)).padStart(2,'0');
+  const pct = Math.max(0, Math.min(100, ((now - START) / (TARGET - START)) * 100));
+  document.getElementById('prog-fill').style.width = pct.toFixed(1) + '%';
+  document.getElementById('prog-lbl').textContent = pct.toFixed(0) + '% of the wait is behind you';
+}
+tick();
+setInterval(tick, 1000);
+
+function switchTab(idx, el) {
+  document.querySelectorAll('.tab-panel').forEach((p,i) => p.classList.toggle('active', i === idx));
+  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', i === idx));
+  document.querySelector('.scroll-area').scrollTop = 0;
+}
+
+const facts = [
+  { badge:'Park history', bc:'background:#EEEDFE;color:#3C3489', title:'The Magic Kingdom opened in 1971', body:'Walt Disney World opened on October 1, 1971, welcoming 10,000 guests on its very first day. Walt Disney himself passed away in 1966 and never saw it completed.', link:'https://disneyworld.disney.go.com/destinations/magic-kingdom/', lt:'Explore Magic Kingdom' },
+  { badge:'Hidden secret', bc:'background:#E1F5EE;color:#085041', title:'Cinderella Castle has a secret royal suite', body:'Hidden inside Cinderella Castle is a luxurious suite with hand-painted murals and mosaic tile floors. Guests can win a stay through Disney sweepstakes.', link:'https://disneyworld.disney.go.com/destinations/magic-kingdom/cinderella-castle/', lt:'Cinderella Castle' },
+  { badge:'Ride fact', bc:'background:#FAEEDA;color:#633806', title:'Haunted Mansion hosts 999 happy haunts', body:'The Haunted Mansion officially has 999 ghosts — and always "room for one more." It opened in 1971 and features the iconic "doom buggy" ride system.', link:'https://disneyworld.disney.go.com/attractions/magic-kingdom/haunted-mansion/', lt:'Haunted Mansion' },
+  { badge:'Hidden secret', bc:'background:#FAECE7;color:#712B13', title:'Underground tunnels run the whole park', body:'A network of tunnels called "utilidors" sits beneath the Magic Kingdom, letting cast members move around without breaking the illusion of themed lands.', link:'https://disneyworld.disney.go.com/faq/', lt:'Disney World FAQ' },
+  { badge:'Ride fact', bc:'background:#E6F1FB;color:#0C447C', title:'Space Mountain opened in 1975', body:'One of Disney\'s most iconic coasters, Space Mountain runs almost entirely in the dark. It was so innovative that Disney patented the ride system.', link:'https://disneyworld.disney.go.com/attractions/magic-kingdom/space-mountain/', lt:'Space Mountain' },
+  { badge:'Park history', bc:'background:#EEEDFE;color:#3C3489', title:'EPCOT was originally planned as a real city', body:'Walt Disney envisioned EPCOT as an actual city where people would live and work. When it opened in 1982, it became a permanent world\'s fair-style park instead.', link:'https://disneyworld.disney.go.com/destinations/epcot/', lt:'Explore EPCOT' },
+  { badge:'Ride fact', bc:'background:#E1F5EE;color:#085041', title:'Tiana\'s Bayou Adventure has a five-story drop', body:'Formerly Splash Mountain, Tiana\'s Bayou Adventure features one of Disney\'s biggest drops — a five-story plunge into a splashdown pool.', link:'https://disneyworld.disney.go.com/attractions/magic-kingdom/tianas-bayou-adventure/', lt:'Tiana\'s Bayou Adventure' },
+  { badge:'Hidden secret', bc:'background:#FAEEDA;color:#633806', title:'Hidden Mickeys are scattered everywhere', body:'Disney Imagineers hid Mickey Mouse silhouettes — three overlapping circles — throughout the parks. There are hundreds in rides, restaurants, and even hotel carpets.', link:'https://disneyworld.disney.go.com/planning-guides/', lt:'Plan your visit' },
+  { badge:'Park fact', bc:'background:#FAECE7;color:#712B13', title:'Disney World is the size of San Francisco', body:'At roughly 40 square miles (27,000 acres), Walt Disney World is about the size of San Francisco. Only about a third of the land has been developed so far.', link:'https://disneyworld.disney.go.com/', lt:'Disney World home' },
+  { badge:'Ride fact', bc:'background:#E6F1FB;color:#0C447C', title:'Pirates of the Caribbean inspired a film franchise', body:'The iconic ride opened in 1973 and was so beloved it spawned the blockbuster film series. Disney later added Jack Sparrow animatronics to the attraction.', link:'https://disneyworld.disney.go.com/attractions/magic-kingdom/pirates-of-the-caribbean/', lt:'Pirates of the Caribbean' },
+  { badge:'Park history', bc:'background:#EEEDFE;color:#3C3489', title:'Animal Kingdom is Disney\'s largest park', body:'Disney\'s Animal Kingdom covers 580 acres, making it the largest Disney theme park in the world. It opened in 1998 and is home to more than 2,000 real animals.', link:'https://disneyworld.disney.go.com/destinations/animal-kingdom/', lt:'Explore Animal Kingdom' },
+  { badge:'Ride fact', bc:'background:#E1F5EE;color:#085041', title:'Expedition Everest reverses in complete darkness', body:'After encountering the Yeti, Expedition Everest\'s train reverses in pitch darkness. The Yeti animatronic inside is one of the largest Disney has ever built.', link:'https://disneyworld.disney.go.com/attractions/animal-kingdom/expedition-everest/', lt:'Expedition Everest' },
+  { badge:'Hidden secret', bc:'background:#FAEEDA;color:#633806', title:'Main Street uses forced perspective tricks', body:'The buildings on Main Street U.S.A. shrink as they rise — the first floor is full size, the second is 5/8 scale, and upper floors are even smaller. This makes the castle look taller.', link:'https://disneyworld.disney.go.com/destinations/magic-kingdom/main-street-usa/', lt:'Main Street U.S.A.' },
+  { badge:'Park fact', bc:'background:#FAECE7;color:#712B13', title:'Disney World employs over 70,000 cast members', body:'Walt Disney World is one of the largest single-site employers in the U.S., with more than 70,000 "cast members" — Disney\'s term for employees — working across the resort.', link:'https://jobs.disneycareers.com/', lt:'Disney Careers' },
+  { badge:'Ride fact', bc:'background:#E6F1FB;color:#0C447C', title:'Tower of Terror drops a randomized sequence', body:'The Twilight Zone Tower of Terror subjects riders to a randomized series of drops and rises up to 13 stories. Each ride experience can be completely different.', link:'https://disneyworld.disney.go.com/attractions/hollywood-studios/twilight-zone-tower-of-terror/', lt:'Tower of Terror' },
+  { badge:'Park history', bc:'background:#EEEDFE;color:#3C3489', title:'Hollywood Studios opened in 1989', body:'Disney\'s Hollywood Studios (originally MGM Studios) opened in 1989 as a working production studio and theme park. It transformed over the decades into a blockbuster-themed experience.', link:'https://disneyworld.disney.go.com/destinations/hollywood-studios/', lt:'Hollywood Studios' },
+  { badge:'Ride fact', bc:'background:#E1F5EE;color:#085041', title:'Guardians of the Galaxy has no lap bar', body:'Guardians of the Galaxy: Cosmic Rewind is one of the few Disney coasters to use an "over-the-shoulder" harness system — and it can spin to face any direction during the ride.', link:'https://disneyworld.disney.go.com/attractions/epcot/guardians-of-the-galaxy-cosmic-rewind/', lt:'Cosmic Rewind' },
+  { badge:'Hidden secret', bc:'background:#FAEEDA;color:#633806', title:'Disney pipes scents into the parks', body:'Disney uses a system called "smellitizers" to pump aromas — like freshly baked cookies on Main Street or sea salt near Pirates of the Caribbean — to enhance the experience.', link:'https://disneyworld.disney.go.com/planning-guides/', lt:'Park planning' },
+  { badge:'Park fact', bc:'background:#FAECE7;color:#712B13', title:'Free ice water is available everywhere', body:'Any Disney quick-service restaurant will give you a free cup of ice water if you ask. A lifesaver during Florida\'s hot summer months!', link:'https://disneyworld.disney.go.com/dining/', lt:'Disney dining' },
+  { badge:'Ride fact', bc:'background:#E6F1FB;color:#0C447C', title:'The Tron coaster is one of the fastest', body:'Tron Lightcycle / Run at Magic Kingdom is one of the fastest Disney coasters in the world, reaching speeds up to 60 mph on its motorcycle-style ride vehicles.', link:'https://disneyworld.disney.go.com/attractions/magic-kingdom/tron-lightcycle-run/', lt:'Tron Lightcycle / Run' },
+];
+
+let currentDay = 0;
+
+function renderFacts() {
+  const idx = currentDay % facts.length;
+  const f = facts[idx];
+  const next = facts[(idx + 1) % facts.length];
+  document.getElementById('day-counter').textContent = 'Day ' + (currentDay + 1) + ' of ' + TOTAL_DAYS;
+  document.getElementById('prev-btn').disabled = currentDay === 0;
+  document.getElementById('next-btn').disabled = currentDay >= TOTAL_DAYS - 1;
+  document.getElementById('facts-container').innerHTML = `
+    <div class="fact-card">
+      <span class="badge" style="${f.bc}">${f.badge}</span>
+      <div class="fact-title">${f.title}</div>
+      <div class="fact-body">${f.body}</div>
+      <a class="fact-link" href="${f.link}" target="_blank">${f.lt} →</a>
+    </div>
+    <div class="fact-card preview">
+      <span class="badge" style="${next.bc}">${next.badge}</span>
+      <div class="fact-title" style="font-size:14px;">${next.title}</div>
+      <div class="preview-label">Tomorrow's fact — keep counting down!</div>
+    </div>
+  `;
+}
+
+function changeDay(dir) {
+  currentDay = Math.max(0, Math.min(TOTAL_DAYS - 1, currentDay + dir));
+  renderFacts();
+  document.querySelector('.scroll-area').scrollTop = 0;
+}
+renderFacts();
+
+const tips = [
+  { bg:'#EEEDFE', icon:'⚡', title:'Use Lightning Lane', body:'Book passes early each morning for Tron, Guardians, and Haunted Mansion.' },
+  { bg:'#E1F5EE', icon:'🌅', title:'Rope drop daily', body:'Arrive before open to ride 2–3 major attractions before crowds build up.' },
+  { bg:'#FAEEDA', icon:'🍽️', title:'Eat at off-peak times', body:'Lunch at 11am or dinner at 5pm beats the main rush and gets faster seating.' },
+  { bg:'#FAECE7', icon:'👟', title:'Wear comfy shoes', body:'Expect 8–12 miles of walking per day. Break in your shoes weeks before.' },
+  { bg:'#E6F1FB', icon:'📱', title:'My Disney Experience app', body:'Shows live wait times, mobile ordering, and manages your Lightning Lane passes.' },
+  { bg:'#EAF3DE', icon:'📅', title:'Book dining at 60 days', body:'Reservations open 60 days out. Popular spots like Be Our Guest fill up fast.' },
+  { bg:'#EEEDFE', icon:'📏', title:'Check height requirements', body:'Review ride height charts before your trip so no one is surprised at the queue.' },
+  { bg:'#FAEEDA', icon:'💧', title:'Stay hydrated', body:'Free ice water is available at any quick-service location — just ask!' },
+];
+
+document.getElementById('tips-container').innerHTML = tips.map(t => `
+  <div class="tip-card">
+    <div class="tip-icon" style="background:${t.bg};font-size:16px;">${t.icon}</div>
+    <div class="tip-title">${t.title}</div>
+    <div class="tip-body">${t.body}</div>
+  </div>
+`).join('');
+
+const checkSections = [
+  { label: 'Book now', items: ['Buy park tickets', 'Reserve park days in app', 'Book hotel or resort', 'Make dining reservations (60 days out)'] },
+  { label: 'Plan ahead', items: ['Download My Disney Experience app', 'Link tickets to the app', 'Research Lightning Lane passes', 'Check ride height requirements', 'Review park hours and schedules'] },
+  { label: 'Before you leave', items: ['Pack sunscreen and hats', 'Break in walking shoes', 'Pack rain ponchos', 'Set a daily spending budget', 'Charge portable battery packs'] },
+];
+
+let checkState = {};
+
+function renderChecklist() {
+  const allItems = checkSections.flatMap(s => s.items);
+  const done = allItems.filter(item => checkState[item]).length;
+  document.getElementById('check-progress').innerHTML = `<span>${done}</span> of ${allItems.length} tasks completed`;
+  document.getElementById('checklist-container').innerHTML = checkSections.map(section => `
+    <div class="section-label">${section.label}</div>
+    <div class="check-card">
+      ${section.items.map(item => `
+        <div class="check-item" onclick="toggleCheck('${item.replace(/'/g,"\\'")}')">
+          <div class="check-box ${checkState[item] ? 'done' : ''}">
+            ${checkState[item] ? '<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>' : ''}
+          </div>
+          <div class="check-label ${checkState[item] ? 'done' : ''}">${item}</div>
+        </div>
+      `).join('')}
+    </div>
+  `).join('');
+}
+
+function toggleCheck(item) {
+  checkState[item] = !checkState[item];
+  try { localStorage.setItem('disney-checks', JSON.stringify(checkState)); } catch(e) {}
+  renderChecklist();
+}
+
+try {
+  const saved = localStorage.getItem('disney-checks');
+  if (saved) checkState = JSON.parse(saved);
+} catch(e) {}
+renderChecklist();
+</script>
+</body>
+</html>
