@@ -197,53 +197,44 @@
   .tip-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 5px; line-height: 1.3; }
   .tip-body { font-size: 12px; color: var(--text-secondary); line-height: 1.55; }
 
-  /* Checklist */
-  .section-label {
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--text-hint);
-    text-transform: uppercase;
+  /* Rides */
+  .park-label {
+    font-size: 11px;
+    font-weight: 700;
     letter-spacing: 0.07em;
-    margin: 0.5rem 0 0.5rem;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 999px;
+    display: inline-block;
+    margin: 1rem 0 0.6rem;
   }
-  .check-card {
+  .rides-card {
     background: var(--card);
     border-radius: 14px;
     border: 1px solid var(--border);
     overflow: hidden;
-    margin-bottom: 12px;
+    margin-bottom: 14px;
   }
-  .check-item {
+  .ride-item {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 12px 14px;
+    justify-content: space-between;
+    padding: 11px 14px;
     border-bottom: 1px solid var(--border);
-    cursor: pointer;
-    -webkit-tap-highlight-color: transparent;
-    transition: background 0.1s;
+    text-decoration: none;
+    gap: 8px;
   }
-  .check-item:last-child { border-bottom: none; }
-  .check-item:active { background: var(--purple-light); }
-  .check-box {
-    width: 22px; height: 22px;
-    border-radius: 7px;
-    border: 1.5px solid #d0cee8;
+  .ride-item:last-child { border-bottom: none; }
+  .ride-item:active { background: var(--purple-light); }
+  .ride-name { font-size: 14px; color: var(--text); line-height: 1.3; flex: 1; }
+  .ride-arrow { font-size: 14px; color: var(--text-hint); flex-shrink: 0; }
+  .ride-tag {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 999px;
     flex-shrink: 0;
-    display: flex; align-items: center; justify-content: center;
-    transition: background 0.15s, border-color 0.15s;
   }
-  .check-box.done { background: var(--purple); border-color: var(--purple); }
-  .check-label { font-size: 14px; color: var(--text); line-height: 1.4; flex: 1; }
-  .check-label.done { color: var(--text-hint); text-decoration: line-through; }
-  .progress-summary {
-    text-align: center;
-    font-size: 13px;
-    color: var(--text-secondary);
-    margin-bottom: 1rem;
-    font-weight: 500;
-  }
-  .progress-summary span { color: var(--purple); font-weight: 700; }
 </style>
 </head>
 <body>
@@ -284,7 +275,7 @@
 <div class="tabs">
   <button class="tab active" onclick="switchTab(0,this)">Daily facts</button>
   <button class="tab" onclick="switchTab(1,this)">Park tips</button>
-  <button class="tab" onclick="switchTab(2,this)">Checklist</button>
+  <button class="tab" onclick="switchTab(2,this)">Rides</button>
 </div>
 
 <div class="scroll-area">
@@ -303,8 +294,7 @@
   </div>
 
   <div class="tab-panel" id="panel-2">
-    <div class="progress-summary" id="check-progress"></div>
-    <div id="checklist-container"></div>
+    <div id="rides-container"></div>
   </div>
 
 </div>
@@ -424,44 +414,82 @@ document.getElementById('tips-container').innerHTML = tips.map(t => `
   </div>
 `).join('');
 
-const checkSections = [
-  { label: 'Book now', items: ['Buy park tickets', 'Reserve park days in app', 'Book hotel or resort', 'Make dining reservations (60 days out)'] },
-  { label: 'Plan ahead', items: ['Download My Disney Experience app', 'Link tickets to the app', 'Research Lightning Lane passes', 'Check ride height requirements', 'Review park hours and schedules'] },
-  { label: 'Before you leave', items: ['Pack sunscreen and hats', 'Break in walking shoes', 'Pack rain ponchos', 'Set a daily spending budget', 'Charge portable battery packs'] },
+const parks = [
+  {
+    name: 'Magic Kingdom',
+    bg: '#EEEDFE', color: '#3C3489',
+    rides: [
+      { name: 'Tron Lightcycle / Run', tag: 'Thrill', tagBg: '#FAECE7', tagColor: '#712B13', url: 'https://disneyworld.disney.go.com/attractions/magic-kingdom/tron-lightcycle-run/' },
+      { name: 'Space Mountain', tag: 'Thrill', tagBg: '#FAECE7', tagColor: '#712B13', url: 'https://disneyworld.disney.go.com/attractions/magic-kingdom/space-mountain/' },
+      { name: 'Big Thunder Mountain Railroad', tag: 'Thrill', tagBg: '#FAECE7', tagColor: '#712B13', url: 'https://disneyworld.disney.go.com/attractions/magic-kingdom/big-thunder-mountain-railroad/' },
+      { name: 'Tiana\'s Bayou Adventure', tag: 'Family', tagBg: '#E1F5EE', tagColor: '#085041', url: 'https://disneyworld.disney.go.com/attractions/magic-kingdom/tianas-bayou-adventure/' },
+      { name: 'Haunted Mansion', tag: 'Family', tagBg: '#E1F5EE', tagColor: '#085041', url: 'https://disneyworld.disney.go.com/attractions/magic-kingdom/haunted-mansion/' },
+      { name: 'Pirates of the Caribbean', tag: 'Family', tagBg: '#E1F5EE', tagColor: '#085041', url: 'https://disneyworld.disney.go.com/attractions/magic-kingdom/pirates-of-the-caribbean/' },
+      { name: 'Seven Dwarfs Mine Train', tag: 'Family', tagBg: '#E1F5EE', tagColor: '#085041', url: 'https://disneyworld.disney.go.com/attractions/magic-kingdom/seven-dwarfs-mine-train/' },
+      { name: 'Peter Pan\'s Flight', tag: 'Classic', tagBg: '#E6F1FB', tagColor: '#0C447C', url: 'https://disneyworld.disney.go.com/attractions/magic-kingdom/peter-pans-flight/' },
+      { name: 'It\'s a Small World', tag: 'Classic', tagBg: '#E6F1FB', tagColor: '#0C447C', url: 'https://disneyworld.disney.go.com/attractions/magic-kingdom/its-a-small-world/' },
+      { name: 'Jungle Cruise', tag: 'Classic', tagBg: '#E6F1FB', tagColor: '#0C447C', url: 'https://disneyworld.disney.go.com/attractions/magic-kingdom/jungle-cruise/' },
+      { name: 'Walt Disney World Railroad', tag: 'Classic', tagBg: '#E6F1FB', tagColor: '#0C447C', url: 'https://disneyworld.disney.go.com/attractions/magic-kingdom/walt-disney-world-railroad/' },
+      { name: 'TOMORROWLAND Speedway', tag: 'Classic', tagBg: '#E6F1FB', tagColor: '#0C447C', url: 'https://disneyworld.disney.go.com/attractions/magic-kingdom/tomorrowland-speedway/' },
+    ]
+  },
+  {
+    name: 'EPCOT',
+    bg: '#E1F5EE', color: '#085041',
+    rides: [
+      { name: 'Guardians of the Galaxy: Cosmic Rewind', tag: 'Thrill', tagBg: '#FAECE7', tagColor: '#712B13', url: 'https://disneyworld.disney.go.com/attractions/epcot/guardians-of-the-galaxy-cosmic-rewind/' },
+      { name: 'Test Track', tag: 'Thrill', tagBg: '#FAECE7', tagColor: '#712B13', url: 'https://disneyworld.disney.go.com/attractions/epcot/test-track/' },
+      { name: 'Frozen Ever After', tag: 'Family', tagBg: '#E1F5EE', tagColor: '#085041', url: 'https://disneyworld.disney.go.com/attractions/epcot/frozen-ever-after/' },
+      { name: 'Remy\'s Ratatouille Adventure', tag: 'Family', tagBg: '#E1F5EE', tagColor: '#085041', url: 'https://disneyworld.disney.go.com/attractions/epcot/remys-ratatouille-adventure/' },
+      { name: 'Soarin\' Around the World', tag: 'Family', tagBg: '#E1F5EE', tagColor: '#085041', url: 'https://disneyworld.disney.go.com/attractions/epcot/soarin/' },
+      { name: 'Living with the Land', tag: 'Classic', tagBg: '#E6F1FB', tagColor: '#0C447C', url: 'https://disneyworld.disney.go.com/attractions/epcot/living-with-the-land/' },
+      { name: 'Spaceship Earth', tag: 'Classic', tagBg: '#E6F1FB', tagColor: '#0C447C', url: 'https://disneyworld.disney.go.com/attractions/epcot/spaceship-earth/' },
+      { name: 'Mission: SPACE', tag: 'Thrill', tagBg: '#FAECE7', tagColor: '#712B13', url: 'https://disneyworld.disney.go.com/attractions/epcot/mission-space/' },
+    ]
+  },
+  {
+    name: 'Hollywood Studios',
+    bg: '#FAEEDA', color: '#633806',
+    rides: [
+      { name: 'Star Wars: Rise of the Resistance', tag: 'Thrill', tagBg: '#FAECE7', tagColor: '#712B13', url: 'https://disneyworld.disney.go.com/attractions/hollywood-studios/star-wars-rise-of-the-resistance/' },
+      { name: 'Twilight Zone Tower of Terror', tag: 'Thrill', tagBg: '#FAECE7', tagColor: '#712B13', url: 'https://disneyworld.disney.go.com/attractions/hollywood-studios/twilight-zone-tower-of-terror/' },
+      { name: 'Rock \'n\' Roller Coaster', tag: 'Thrill', tagBg: '#FAECE7', tagColor: '#712B13', url: 'https://disneyworld.disney.go.com/attractions/hollywood-studios/rock-n-roller-coaster/' },
+      { name: 'Millennium Falcon: Smugglers Run', tag: 'Family', tagBg: '#E1F5EE', tagColor: '#085041', url: 'https://disneyworld.disney.go.com/attractions/hollywood-studios/millennium-falcon-smugglers-run/' },
+      { name: 'Slinky Dog Dash', tag: 'Family', tagBg: '#E1F5EE', tagColor: '#085041', url: 'https://disneyworld.disney.go.com/attractions/hollywood-studios/slinky-dog-dash/' },
+      { name: 'Mickey & Minnie\'s Runaway Railway', tag: 'Family', tagBg: '#E1F5EE', tagColor: '#085041', url: 'https://disneyworld.disney.go.com/attractions/hollywood-studios/mickey-minnies-runaway-railway/' },
+      { name: 'Toy Story Mania!', tag: 'Family', tagBg: '#E1F5EE', tagColor: '#085041', url: 'https://disneyworld.disney.go.com/attractions/hollywood-studios/toy-story-mania/' },
+      { name: 'Indiana Jones Epic Stunt Spectacular', tag: 'Show', tagBg: '#EEEDFE', tagColor: '#3C3489', url: 'https://disneyworld.disney.go.com/entertainment/hollywood-studios/indiana-jones-epic-stunt-spectacular/' },
+    ]
+  },
+  {
+    name: 'Animal Kingdom',
+    bg: '#EAF3DE', color: '#27500A',
+    rides: [
+      { name: 'Avatar Flight of Passage', tag: 'Thrill', tagBg: '#FAECE7', tagColor: '#712B13', url: 'https://disneyworld.disney.go.com/attractions/animal-kingdom/avatar-flight-of-passage/' },
+      { name: 'Expedition Everest', tag: 'Thrill', tagBg: '#FAECE7', tagColor: '#712B13', url: 'https://disneyworld.disney.go.com/attractions/animal-kingdom/expedition-everest/' },
+      { name: 'DINOSAUR', tag: 'Thrill', tagBg: '#FAECE7', tagColor: '#712B13', url: 'https://disneyworld.disney.go.com/attractions/animal-kingdom/dinosaur/' },
+      { name: 'Na\'vi River Journey', tag: 'Family', tagBg: '#E1F5EE', tagColor: '#085041', url: 'https://disneyworld.disney.go.com/attractions/animal-kingdom/navi-river-journey/' },
+      { name: 'Kilimanjaro Safaris', tag: 'Family', tagBg: '#E1F5EE', tagColor: '#085041', url: 'https://disneyworld.disney.go.com/attractions/animal-kingdom/kilimanjaro-safaris/' },
+      { name: 'Kali River Rapids', tag: 'Family', tagBg: '#E1F5EE', tagColor: '#085041', url: 'https://disneyworld.disney.go.com/attractions/animal-kingdom/kali-river-rapids/' },
+      { name: 'Wildlife Express Train', tag: 'Classic', tagBg: '#E6F1FB', tagColor: '#0C447C', url: 'https://disneyworld.disney.go.com/attractions/animal-kingdom/wildlife-express-train/' },
+      { name: 'It\'s Tough to be a Bug!', tag: 'Show', tagBg: '#EEEDFE', tagColor: '#3C3489', url: 'https://disneyworld.disney.go.com/entertainment/animal-kingdom/its-tough-to-be-a-bug/' },
+    ]
+  },
 ];
 
-let checkState = {};
+document.getElementById('rides-container').innerHTML = parks.map(park => `
+  <span class="park-label" style="background:${park.bg};color:${park.color};">${park.name}</span>
+  <div class="rides-card">
+    ${park.rides.map(ride => `
+      <a class="ride-item" href="${ride.url}" target="_blank">
+        <span class="ride-name">${ride.name}</span>
+        <span class="ride-tag" style="background:${ride.tagBg};color:${ride.tagColor};">${ride.tag}</span>
+        <span class="ride-arrow">›</span>
+      </a>
+    `).join('')}
+  </div>
+`).join('');
 
-function renderChecklist() {
-  const allItems = checkSections.flatMap(s => s.items);
-  const done = allItems.filter(item => checkState[item]).length;
-  document.getElementById('check-progress').innerHTML = `<span>${done}</span> of ${allItems.length} tasks completed`;
-  document.getElementById('checklist-container').innerHTML = checkSections.map(section => `
-    <div class="section-label">${section.label}</div>
-    <div class="check-card">
-      ${section.items.map(item => `
-        <div class="check-item" onclick="toggleCheck('${item.replace(/'/g,"\\'")}')">
-          <div class="check-box ${checkState[item] ? 'done' : ''}">
-            ${checkState[item] ? '<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>' : ''}
-          </div>
-          <div class="check-label ${checkState[item] ? 'done' : ''}">${item}</div>
-        </div>
-      `).join('')}
-    </div>
-  `).join('');
-}
-
-function toggleCheck(item) {
-  checkState[item] = !checkState[item];
-  try { localStorage.setItem('disney-checks', JSON.stringify(checkState)); } catch(e) {}
-  renderChecklist();
-}
-
-try {
-  const saved = localStorage.getItem('disney-checks');
-  if (saved) checkState = JSON.parse(saved);
-} catch(e) {}
-renderChecklist();
 </script>
 </body>
 </html>
