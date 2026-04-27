@@ -286,6 +286,10 @@
       <span class="day-counter" id="day-counter"></span>
       <button class="nav-btn" id="next-btn" onclick="changeDay(1)">Next →</button>
     </div>
+    <div style="display:flex;gap:8px;margin-bottom:0.9rem;">
+      <button class="nav-btn" style="flex:1;text-align:center;" onclick="goToDay(0)">← First</button>
+      <button class="nav-btn" style="flex:1;text-align:center;" onclick="goToDay(TOTAL_DAYS-1)">Last →</button>
+    </div>
     <div id="facts-container"></div>
   </div>
 
@@ -386,6 +390,12 @@ function renderFacts() {
       <div class="preview-label">Tomorrow's fact — keep counting down!</div>
     </div>
   `;
+}
+
+function goToDay(n) {
+  currentDay = Math.max(0, Math.min(TOTAL_DAYS - 1, n));
+  renderFacts();
+  document.querySelector('.scroll-area').scrollTop = 0;
 }
 
 function changeDay(dir) {
